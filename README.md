@@ -8,6 +8,7 @@ SlimePlus is a Spigot plugin that enhances slime block mechanics with customizab
 - **Max Bounce Height**: Set a hard cap on the maximum bounce height.
 - **Boost Mechanic**: Add an extra upward boost when bouncing.
 - **Remove Vanilla Limit**: Bypasses the default 44-block height limit for slime bounces.
+- **Fall Damage Protection**: Optional protection to prevent dying when landing after a high bounce.
 - **Admin GUI**: Easy-to-use interface for OPs to manage settings in-game.
 
 ## Commands
@@ -36,6 +37,7 @@ max-bounce-height: 256.0
 boost-enabled: false
 boost-power: 0.5
 remove-vanilla-limit: true
+prevent-fall-damage: true
 ```
 
 ## Developer
