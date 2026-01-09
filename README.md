@@ -2,7 +2,7 @@
   <img src="assets/logo.png" width="300" alt="SlimePlus Logo">
 </p>
 
-# 🟢 SlimePlus Documentation
+# 🟢 SlimePlus
 
 ## Overview
 SlimePlus is a Spigot plugin that enhances slime block mechanics with customizable bounce heights, removal of vanilla limits, and an optional boost mechanic.
@@ -15,7 +15,9 @@ SlimePlus is a Spigot plugin that enhances slime block mechanics with customizab
 - **Fall Damage Protection**: Optional protection to prevent dying when landing after a high bounce.
 - **Admin GUI**: Easy-to-use interface for OPs to manage settings in-game.
 
-![Admin GUI](assets/gui.png)
+<p align="center">
+  <img src="assets/gui.png" alt="Admin GUI">
+</p>
 
 ## Compatibility
 SlimePlus is built on the Spigot API and is designed to work across a wide range of server platforms:
