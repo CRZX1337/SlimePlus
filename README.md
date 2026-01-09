@@ -13,11 +13,11 @@ SlimePlus is a Spigot plugin that enhances slime block mechanics with customizab
 
 ## Compatibility
 SlimePlus is built on the Spigot API and is designed to work across a wide range of server platforms:
+- **CraftBukkit**: Fully Supported (Recommended/Development)
+- **Paper**: Fully Supported
 - **Spigot**: Fully Supported
-- **Paper**: Fully Supported (Recommended)
 - **Purpur**: Fully Supported
 - **Pufferfish**: Fully Supported
-- **CraftBukkit**: Fully Supported
 
 Tested on Minecraft **1.21.x**, but likely works on older versions that support the modern Spigot API.
 
