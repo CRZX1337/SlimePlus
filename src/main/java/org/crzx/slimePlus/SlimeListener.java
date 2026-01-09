@@ -2,6 +2,8 @@ package org.crzx.slimePlus;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -80,27 +82,48 @@ public class SlimeListener implements Listener {
         }
 
         // --- CUSTOM BOUNCE LOGIC ---
-        if (player.getVelocity().getY() < -0.1) {
-            Block blockBelow = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
+        // Use delta Y for more reliable velocity detection in PlayerMoveEvent
+        double dy = event.getTo().getY() - event.getFrom().getY();
+        
+        // Trigger if moving downwards OR if they are standing on the block
+        // This makes the "boost" much more reliable
+        if (dy < 0 || player.isOnGround()) {
+            // Check the block exactly below the player's feet
+            // We check a slightly larger range (0.5 blocks) to ensure we catch the landing
+            Block blockBelow = null;
+            for (double d = 0.0; d <= 0.5; d += 0.1) {
+                Block b = event.getTo().clone().subtract(0, d, 0).getBlock();
+                if (b.getType() == Material.SLIME_BLOCK) {
+                    blockBelow = b;
+                    break;
+                }
+            }
             
-            if (blockBelow.getType() == Material.SLIME_BLOCK) {
+            if (blockBelow != null) {
+                // To prevent "infinite bouncing" or jitter, we only trigger if they aren't already moving upwards fast
+                if (player.getVelocity().getY() > 0.5) return;
+
                 double multiplier = plugin.getConfig().getDouble("bounce-multiplier", 1.0);
-                
                 boolean boostEnabled = plugin.getConfig().getBoolean("boost-enabled", false);
                 double boostPower = plugin.getConfig().getDouble("boost-power", 0.5);
                 boolean removeLimit = plugin.getConfig().getBoolean("remove-vanilla-limit", true);
 
                 float fallDistance = player.getFallDistance();
-                if (fallDistance < 0.1f) fallDistance = 0.5f; 
+                // Ensure a minimum bounce even for small drops
+                if (fallDistance < 0.5f) fallDistance = 0.5f; 
                 
                 if (!removeLimit && fallDistance > 44.0f) {
                     fallDistance = 44.0f;
                 }
 
+                // Calculate base velocity using the same formula as before
                 double newY = Math.sqrt(fallDistance * 0.2) * multiplier;
                 
+                // Automatic boost logic - MAKE IT POWERFUL
                 if (boostEnabled) {
-                    newY += boostPower;
+                    newY += (boostPower * 1.5) + 0.2; 
+                } else {
+                    newY += 0.1;
                 }
 
                 double maxVelocity = Math.sqrt(maxHeight * 0.2);
@@ -108,12 +131,24 @@ public class SlimeListener implements Listener {
                     newY = maxVelocity;
                 }
 
+                // Apply velocity
                 Vector velocity = player.getVelocity();
                 velocity.setY(newY);
                 player.setVelocity(velocity);
+                
+                // CRITICAL: Reset fall distance
                 player.setFallDistance(0);
                 
-                // Mark player as boosted to prevent fall damage on any block
+                // --- COOL EFFECTS ---
+                Location loc = player.getLocation();
+                player.getWorld().spawnParticle(Particle.BLOCK, loc, 30, 0.5, 0.1, 0.5, 0.1, Material.SLIME_BLOCK.createBlockData());
+                player.getWorld().spawnParticle(Particle.CLOUD, loc, 15, 0.3, 0.3, 0.3, 0.1);
+                
+                player.getWorld().playSound(loc, Sound.ENTITY_SLIME_JUMP, 1f, 1f);
+                if (newY > 1.0) {
+                    player.getWorld().playSound(loc, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.8f, 1.2f);
+                }
+
                 boostedPlayers.add(player.getUniqueId());
             }
         }

@@ -5,9 +5,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -60,41 +63,49 @@ public class SlimeGUI implements Listener {
     private void refresh(Player player) {
         TempConfig config = tempConfigs.get(player.getUniqueId());
         
-        // Background
+        // Background - Use a nice border pattern
         ItemStack filler = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i = 0; i < 27; i++) inventory.setItem(i, filler);
+        ItemStack border = createItem(Material.LIME_STAINED_GLASS_PANE, "§a§lSlime§f§lPlus");
+        
+        for (int i = 0; i < 27; i++) {
+            if (i < 9 || i > 17 || i % 9 == 0 || i % 9 == 8) {
+                inventory.setItem(i, border);
+            } else {
+                inventory.setItem(i, filler);
+            }
+        }
 
         // Slider (Multiplier) - Slot 10
         if (config.maxHeight <= 0) {
-            inventory.setItem(10, createItem(Material.BARRIER, "§aBounce Multiplier", 
+            inventory.setItem(10, createItem(Material.BARRIER, "§e§lBounce Multiplier", 
                     "§7Status: §c§lDISABLED", "§7Set Max Height > 0 to enable."));
         } else {
-            inventory.setItem(10, createItem(Material.SLIME_BALL, "§aBounce Multiplier", 
-                    "§7Current: §f" + config.multiplier, "§eLeft Click: §7+0.5", "§eRight Click: §7-0.5"));
+            inventory.setItem(10, createGlowItem(Material.SLIME_BALL, "§e§lBounce Multiplier", 
+                    "§7Current: §b" + config.multiplier + "x", "", "§eLeft-Click: §a+0.5", "§eRight-Click: §c-0.5"));
         }
 
         // Toggle (Boost) - Slot 12
         if (config.maxHeight <= 0) {
-            inventory.setItem(12, createItem(Material.BARRIER, "§aBoost Mechanic", 
+            inventory.setItem(12, createItem(Material.BARRIER, "§b§lBoost Mechanic", 
                     "§7Status: §c§lDISABLED", "§7Set Max Height > 0 to enable."));
         } else {
-            inventory.setItem(12, createItem(config.boost ? Material.LIME_DYE : Material.GRAY_DYE, "§aBoost Mechanic", 
-                    "§7Status: " + (config.boost ? "§aEnabled" : "§cDisabled"), "§eClick to toggle"));
+            inventory.setItem(12, createToggleItem(config.boost, "§b§lBoost Mechanic", 
+                    "§7Status: " + (config.boost ? "§aEnabled" : "§cDisabled"), "", "§eClick to toggle"));
         }
 
         // Input (Max Height) - Slot 14
-        inventory.setItem(14, createItem(Material.PAPER, "§aMax Bounce Height", 
-                "§7Current: §f" + config.maxHeight, "§eClick to set custom value"));
+        inventory.setItem(14, createItem(Material.PAPER, "§d§lMax Bounce Height", 
+                "§7Current: §f" + config.maxHeight + " blocks", "", "§eClick to set custom value"));
 
         // Toggle (Fall Damage) - Slot 16
-        inventory.setItem(16, createItem(config.preventFallDamage ? Material.FEATHER : Material.IRON_BOOTS, "§aFall Damage Protection", 
-                "§7Status: " + (config.preventFallDamage ? "§aEnabled" : "§cDisabled"), "§eClick to toggle"));
+        inventory.setItem(16, createToggleItem(config.preventFallDamage, "§f§lFall Damage Protection", 
+                "§7Status: " + (config.preventFallDamage ? "§aEnabled" : "§cDisabled"), "", "§eClick to toggle"));
 
         // Save - Slot 21
-        inventory.setItem(21, createItem(Material.EMERALD_BLOCK, "§a§lSAVE", "§7Apply changes to config.yml"));
+        inventory.setItem(21, createGlowItem(Material.EMERALD_BLOCK, "§a§lSAVE CHANGES", "§7Apply changes to config.yml"));
 
         // Cancel - Slot 23
-        inventory.setItem(23, createItem(Material.REDSTONE_BLOCK, "§c§lCANCEL", "§7Discard all changes"));
+        inventory.setItem(23, createItem(Material.REDSTONE_BLOCK, "§c§lDISCARD", "§7Discard all changes"));
     }
 
     private ItemStack createItem(Material material, String name, String... lore) {
@@ -108,6 +119,23 @@ public class SlimeGUI implements Listener {
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    private ItemStack createGlowItem(Material material, String name, String... lore) {
+        ItemStack item = createItem(material, name, lore);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.LURE, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createToggleItem(boolean enabled, String name, String... lore) {
+        Material mat = enabled ? Material.LIME_DYE : Material.GRAY_DYE;
+        if (enabled) return createGlowItem(mat, name, lore);
+        return createItem(mat, name, lore);
     }
 
     @EventHandler
@@ -126,29 +154,36 @@ public class SlimeGUI implements Listener {
         if (slot == 10) { // Multiplier
             if (config.maxHeight <= 0) {
                 player.sendMessage("§cYou must set a Max Height greater than 0 to use the multiplier.");
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
                 return;
             }
             if (event.isLeftClick()) {
                 if (config.multiplier >= 10.0) config.multiplier = 0.5;
                 else config.multiplier += 0.5;
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.2f);
             } else if (event.isRightClick()) {
                 if (config.multiplier <= 0.5) config.multiplier = 10.0;
                 else config.multiplier -= 0.5;
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 0.8f);
             }
             refresh(player);
         } else if (slot == 12) { // Boost
             if (config.maxHeight <= 0) {
                 player.sendMessage("§cYou must set a Max Height greater than 0 to use the boost.");
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
                 return;
             }
             config.boost = !config.boost;
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, config.boost ? 1.5f : 0.5f);
             refresh(player);
         } else if (slot == 14) { // Max Height
             player.closeInventory();
             player.sendMessage("§aPlease type the new maximum height in chat:");
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1f);
             waitingForInput.put(uuid, "maxHeight");
         } else if (slot == 16) { // Fall Damage
             config.preventFallDamage = !config.preventFallDamage;
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, config.preventFallDamage ? 1.5f : 0.5f);
             refresh(player);
         } else if (slot == 21) { // Save
             plugin.getConfig().set("bounce-multiplier", config.multiplier);
@@ -158,10 +193,12 @@ public class SlimeGUI implements Listener {
             plugin.saveConfig();
             player.closeInventory();
             player.sendMessage("§aConfiguration saved successfully!");
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
             tempConfigs.remove(uuid);
         } else if (slot == 23) { // Cancel
             player.closeInventory();
             player.sendMessage("§cChanges discarded.");
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 1f);
             tempConfigs.remove(uuid);
         }
     }
