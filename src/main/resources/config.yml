@@ -1,0 +1,20 @@
+# SlimePlus Configuration
+# Developed by CRZX1337
+
+# The multiplier for the bounce height.
+# 1.0 is default vanilla behavior (approx 80% return).
+bounce-multiplier: 1.0
+
+# The maximum height a player can bounce (in blocks).
+# Default vanilla is around 44-50 blocks effective height.
+max-bounce-height: 256.0
+
+# Toggle for the boost mechanic.
+# If enabled, players will receive an extra boost when bouncing.
+boost-enabled: false
+
+# The power of the boost mechanic.
+boost-power: 0.5
+
+# Whether to remove the vanilla 44-block bounce height limit.
+remove-vanilla-limit: true

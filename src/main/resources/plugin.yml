@@ -3,5 +3,14 @@ version: '1.0-SNAPSHOT'
 main: org.crzx.slimePlus.SlimePlus
 api-version: '1.21'
 load: STARTUP
-authors: [ CryZuX ]
+authors: [ CRZX1337 ]
 website: https://github.com/CRZX1337/
+commands:
+  slimeplus:
+    description: Main command for SlimePlus
+    usage: /slimeplus
+    permission: slimeplus.admin
+permissions:
+  slimeplus.admin:
+    description: Allows access to SlimePlus admin GUI
+    default: op
