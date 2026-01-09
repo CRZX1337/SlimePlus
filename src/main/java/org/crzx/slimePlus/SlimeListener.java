@@ -8,12 +8,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class SlimeListener implements Listener {
 
     private final SlimePlus plugin;
+    private final Set<UUID> boostedPlayers = new HashSet<>();
 
     public SlimeListener(SlimePlus plugin) {
         this.plugin = plugin;
@@ -106,6 +112,23 @@ public class SlimeListener implements Listener {
                 velocity.setY(newY);
                 player.setVelocity(velocity);
                 player.setFallDistance(0);
+                
+                // Mark player as boosted to prevent fall damage on any block
+                boostedPlayers.add(player.getUniqueId());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        
+        Player player = (Player) event.getEntity();
+        
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            if (boostedPlayers.contains(player.getUniqueId())) {
+                event.setCancelled(true);
+                boostedPlayers.remove(player.getUniqueId());
             }
         }
     }

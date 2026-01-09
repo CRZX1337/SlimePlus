@@ -14,7 +14,6 @@ public final class SlimePlus extends JavaPlugin {
         saveDefaultConfig();
         slimeGUI = new SlimeGUI(this);
         getServer().getPluginManager().registerEvents(new SlimeListener(this), this);
-        getServer().getPluginManager().registerEvents(new BounceCancelListener(this), this);
         getServer().getPluginManager().registerEvents(slimeGUI, this);
         getCommand("slimeplus").setExecutor(new SlimeCommand(this));
     }
