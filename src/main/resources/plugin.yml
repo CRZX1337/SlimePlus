@@ -1,0 +1,7 @@
+name: SlimePlus
+version: '1.0-SNAPSHOT'
+main: org.crzx.slimePlus.SlimePlus
+api-version: '1.21'
+load: STARTUP
+authors: [ CryZuX ]
+website: https://github.com/CRZX1337/
