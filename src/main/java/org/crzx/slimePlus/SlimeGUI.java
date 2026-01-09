@@ -34,11 +34,13 @@ public class SlimeGUI implements Listener {
         double multiplier;
         boolean boost;
         double maxHeight;
+        boolean preventFallDamage;
 
-        TempConfig(double multiplier, boolean boost, double maxHeight) {
+        TempConfig(double multiplier, boolean boost, double maxHeight, boolean preventFallDamage) {
             this.multiplier = multiplier;
             this.boost = boost;
             this.maxHeight = maxHeight;
+            this.preventFallDamage = preventFallDamage;
         }
     }
 
@@ -46,7 +48,8 @@ public class SlimeGUI implements Listener {
         TempConfig config = tempConfigs.getOrDefault(player.getUniqueId(), new TempConfig(
                 plugin.getConfig().getDouble("bounce-multiplier", 1.0),
                 plugin.getConfig().getBoolean("boost-enabled", false),
-                plugin.getConfig().getDouble("max-bounce-height", 256.0)
+                plugin.getConfig().getDouble("max-bounce-height", 256.0),
+                plugin.getConfig().getBoolean("prevent-fall-damage", true)
         ));
         tempConfigs.put(player.getUniqueId(), config);
         
@@ -82,6 +85,10 @@ public class SlimeGUI implements Listener {
         // Input (Max Height) - Slot 14
         inventory.setItem(14, createItem(Material.PAPER, "§aMax Bounce Height", 
                 "§7Current: §f" + config.maxHeight, "§eClick to set custom value"));
+
+        // Toggle (Fall Damage) - Slot 16
+        inventory.setItem(16, createItem(config.preventFallDamage ? Material.FEATHER : Material.IRON_BOOTS, "§aFall Damage Protection", 
+                "§7Status: " + (config.preventFallDamage ? "§aEnabled" : "§cDisabled"), "§eClick to toggle"));
 
         // Save - Slot 21
         inventory.setItem(21, createItem(Material.EMERALD_BLOCK, "§a§lSAVE", "§7Apply changes to config.yml"));
@@ -140,10 +147,14 @@ public class SlimeGUI implements Listener {
             player.closeInventory();
             player.sendMessage("§aPlease type the new maximum height in chat:");
             waitingForInput.put(uuid, "maxHeight");
+        } else if (slot == 16) { // Fall Damage
+            config.preventFallDamage = !config.preventFallDamage;
+            refresh(player);
         } else if (slot == 21) { // Save
             plugin.getConfig().set("bounce-multiplier", config.multiplier);
             plugin.getConfig().set("boost-enabled", config.boost);
             plugin.getConfig().set("max-bounce-height", config.maxHeight);
+            plugin.getConfig().set("prevent-fall-damage", config.preventFallDamage);
             plugin.saveConfig();
             player.closeInventory();
             player.sendMessage("§aConfiguration saved successfully!");

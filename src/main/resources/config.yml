@@ -18,3 +18,6 @@ boost-power: 0.5
 
 # Whether to remove the vanilla 44-block bounce height limit.
 remove-vanilla-limit: true
+
+# Whether to prevent fall damage on the next landing after a bounce.
+prevent-fall-damage: true

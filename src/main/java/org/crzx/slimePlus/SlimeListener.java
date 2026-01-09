@@ -127,7 +127,10 @@ public class SlimeListener implements Listener {
         
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             if (boostedPlayers.contains(player.getUniqueId())) {
-                event.setCancelled(true);
+                boolean preventDamage = plugin.getConfig().getBoolean("prevent-fall-damage", true);
+                if (preventDamage) {
+                    event.setCancelled(true);
+                }
                 boostedPlayers.remove(player.getUniqueId());
             }
         }
