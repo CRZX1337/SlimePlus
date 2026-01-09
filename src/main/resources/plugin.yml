@@ -1,6 +1,7 @@
 name: SlimePlus
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: org.crzx.slimePlus.SlimePlus
+description: Enhance your slime block mechanics with custom bounces and boosts!
 api-version: '1.21'
 load: STARTUP
 authors: [ CRZX1337 ]
