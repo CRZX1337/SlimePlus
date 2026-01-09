@@ -62,12 +62,22 @@ public class SlimeGUI implements Listener {
         for (int i = 0; i < 27; i++) inventory.setItem(i, filler);
 
         // Slider (Multiplier) - Slot 10
-        inventory.setItem(10, createItem(Material.SLIME_BALL, "§aBounce Multiplier", 
-                "§7Current: §f" + config.multiplier, "§eLeft Click: §7+0.5", "§eRight Click: §7-0.5"));
+        if (config.maxHeight <= 0) {
+            inventory.setItem(10, createItem(Material.BARRIER, "§aBounce Multiplier", 
+                    "§7Status: §c§lDISABLED", "§7Set Max Height > 0 to enable."));
+        } else {
+            inventory.setItem(10, createItem(Material.SLIME_BALL, "§aBounce Multiplier", 
+                    "§7Current: §f" + config.multiplier, "§eLeft Click: §7+0.5", "§eRight Click: §7-0.5"));
+        }
 
         // Toggle (Boost) - Slot 12
-        inventory.setItem(12, createItem(config.boost ? Material.LIME_DYE : Material.GRAY_DYE, "§aBoost Mechanic", 
-                "§7Status: " + (config.boost ? "§aEnabled" : "§cDisabled"), "§eClick to toggle"));
+        if (config.maxHeight <= 0) {
+            inventory.setItem(12, createItem(Material.BARRIER, "§aBoost Mechanic", 
+                    "§7Status: §c§lDISABLED", "§7Set Max Height > 0 to enable."));
+        } else {
+            inventory.setItem(12, createItem(config.boost ? Material.LIME_DYE : Material.GRAY_DYE, "§aBoost Mechanic", 
+                    "§7Status: " + (config.boost ? "§aEnabled" : "§cDisabled"), "§eClick to toggle"));
+        }
 
         // Input (Max Height) - Slot 14
         inventory.setItem(14, createItem(Material.PAPER, "§aMax Bounce Height", 
@@ -107,15 +117,23 @@ public class SlimeGUI implements Listener {
         int slot = event.getRawSlot();
         
         if (slot == 10) { // Multiplier
+            if (config.maxHeight <= 0) {
+                player.sendMessage("§cYou must set a Max Height greater than 0 to use the multiplier.");
+                return;
+            }
             if (event.isLeftClick()) {
-                if (config.multiplier >= 5.0) config.multiplier = 0.5;
+                if (config.multiplier >= 10.0) config.multiplier = 0.5;
                 else config.multiplier += 0.5;
             } else if (event.isRightClick()) {
-                if (config.multiplier <= 0.5) config.multiplier = 5.0;
+                if (config.multiplier <= 0.5) config.multiplier = 10.0;
                 else config.multiplier -= 0.5;
             }
             refresh(player);
         } else if (slot == 12) { // Boost
+            if (config.maxHeight <= 0) {
+                player.sendMessage("§cYou must set a Max Height greater than 0 to use the boost.");
+                return;
+            }
             config.boost = !config.boost;
             refresh(player);
         } else if (slot == 14) { // Max Height
