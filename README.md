@@ -58,5 +58,8 @@ remove-vanilla-limit: true
 prevent-fall-damage: true
 ```
 
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Developer
 Developed by **CRZX1337**
