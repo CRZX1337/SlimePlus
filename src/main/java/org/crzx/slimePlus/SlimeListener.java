@@ -1,5 +1,6 @@
 package org.crzx.slimePlus;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -28,25 +29,45 @@ public class SlimeListener implements Listener {
 
         // --- STONE-LIKE BEHAVIOR WHEN MAX HEIGHT IS 0 ---
         if (maxHeight <= 0) {
-            Block blockBelow = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
-            if (blockBelow.getType() == Material.SLIME_BLOCK) {
-                // 1. Prevent Bounce (Cancel downward velocity when hitting the block)
-                if (player.getVelocity().getY() < -0.1) {
-                    Vector velocity = player.getVelocity();
-                    velocity.setY(0);
-                    player.setVelocity(velocity);
-                    player.setFallDistance(0);
-                }
+            // Check the block the player is STANDING ON (more precise than DOWN)
+            Block standingOn = player.getLocation().clone().subtract(0, 0.1, 0).getBlock();
+            
+            if (standingOn.getType() == Material.SLIME_BLOCK) {
+                // 1. Fix Walking Speed without changing FOV
+                // Instead of PotionEffects or setVelocity (which cause jitter/FOV zoom),
+                // we slightly increase the "To" location to compensate for slime friction.
+                Location from = event.getFrom();
+                Location to = event.getTo();
                 
-                // 2. Prevent "Jump Suction" (Slimes usually limit jump height)
-                // If the player just started moving up (jumped), we give them a boost to match stone jumps
-                if (event.getTo().getY() > event.getFrom().getY() && player.getVelocity().getY() > 0) {
-                    // Normal jump velocity is ~0.42. Slime reduces it. We push it back up.
-                    if (player.getVelocity().getY() < 0.4) {
-                        Vector velocity = player.getVelocity();
-                        velocity.setY(0.42);
-                        player.setVelocity(velocity);
+                double dx = to.getX() - from.getX();
+                double dz = to.getZ() - from.getZ();
+                
+                // Only apply if they are moving horizontally and on the ground
+                if ((dx != 0 || dz != 0) && player.isOnGround()) {
+                    // Slime friction is roughly 1.5x stronger than stone. 
+                    // We push the destination a bit further.
+                    event.setTo(new Location(
+                        to.getWorld(), 
+                        from.getX() + (dx * 1.6), 
+                        to.getY(), 
+                        from.getZ() + (dz * 1.6), 
+                        to.getYaw(), 
+                        to.getPitch()
+                    ));
+                }
+
+                // 2. Fix Jumping (Slime usually reduces jump height)
+                if (to.getY() > from.getY() && !player.isOnGround()) {
+                    if (player.getVelocity().getY() > 0 && player.getVelocity().getY() < 0.42) {
+                        Vector vel = player.getVelocity();
+                        vel.setY(0.42);
+                        player.setVelocity(vel);
                     }
+                }
+
+                // 3. Prevent Bounce (Cancel fall distance when hitting)
+                if (player.getVelocity().getY() < 0) {
+                    player.setFallDistance(0);
                 }
             }
             return;
