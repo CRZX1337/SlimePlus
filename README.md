@@ -11,6 +11,8 @@ SlimePlus is a Spigot plugin that enhances slime block mechanics with customizab
 - **Fall Damage Protection**: Optional protection to prevent dying when landing after a high bounce.
 - **Admin GUI**: Easy-to-use interface for OPs to manage settings in-game.
 
+![Admin GUI](assets/gui.png)
+
 ## Compatibility
 SlimePlus is built on the Spigot API and is designed to work across a wide range of server platforms:
 - **CraftBukkit**: Fully Supported (Recommended/Development)
