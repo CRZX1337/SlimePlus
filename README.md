@@ -1,4 +1,8 @@
-# SlimePlus Documentation
+<p align="center">
+  <img src="assets/logo.png" width="300" alt="SlimePlus Logo">
+</p>
+
+# 🟢 SlimePlus Documentation
 
 ## Overview
 SlimePlus is a Spigot plugin that enhances slime block mechanics with customizable bounce heights, removal of vanilla limits, and an optional boost mechanic.
